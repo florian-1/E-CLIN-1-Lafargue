@@ -1,36 +1,51 @@
 import java.util.ArrayList;
+import java.util.Comparator;
 
 public class Clinic {
 
 	private ArrayList<Patient> listFifoMedecin;
 	private ArrayList<Patient> listFifoRadiologie;
 	private TriageType triageType;
+	private int priorityGravity = 5;
+	private Comparator<Patient> comparatorPatient = new Comparator<Patient>() {
+		@Override
+		public int compare(Patient p1, Patient p2) {
+			if (p1.getGravity() > priorityGravity || p2.getGravity() > priorityGravity) {
+				// on ne fait les priorité que pour une valeurs au dessus de 5
+				return p2.getGravity() - p1.getGravity();
+			}
+			return 0;
+		}
+	};
 
 	public Clinic(TriageType triageType) {
 		this.triageType = triageType;
-		if (triageType == TriageType.FIFO) {
-			listFifoMedecin = new ArrayList<Patient>();
-			listFifoRadiologie = new ArrayList<Patient>();
-		}
+		listFifoMedecin = new ArrayList<Patient>();
+		listFifoRadiologie = new ArrayList<Patient>();
 	}
 
 	public void triagePatient(Patient patient) {
-		int priorityGravity = 5;
 		if (triageType == TriageType.FIFO) {
-			if (patient.getVisible_symptom() == VisibleSymptom.BROKEN_BONE // go to radiologie or not
-					|| patient.getVisible_symptom() == VisibleSymptom.SPRAIN) {
-				if (patient.getGravity() > priorityGravity) {// gravity evaluation
-					listFifoRadiologie.add(0, patient);
-				} else {
-					listFifoRadiologie.add(patient);
-				}
-			}
-			if (patient.getGravity() > priorityGravity) {// gravity evaluation
-				listFifoMedecin.add(0, patient);
-			} else {
-				listFifoMedecin.add(patient);
+			listFifoMedecin.add(patient);
+			if (NeedRadiologie(patient.getVisible_symptom())) {
+				listFifoRadiologie.add(patient);
 			}
 		}
+		if (triageType == TriageType.GRAVITY) {
+			listFifoMedecin.add(patient);
+			listFifoMedecin.sort(comparatorPatient);
+			if (NeedRadiologie(patient.getVisible_symptom())) {
+				listFifoRadiologie.add(patient);
+				listFifoRadiologie.sort(comparatorPatient);
+			}
+		}
+	}
+
+	public boolean NeedRadiologie(VisibleSymptom visibleSymptom) {// go to radiologie or not
+		if (visibleSymptom == VisibleSymptom.BROKEN_BONE || visibleSymptom == VisibleSymptom.SPRAIN) {
+			return true;
+		}
+		return false;
 	}
 
 	public TriageType getTriageType() {
@@ -43,6 +58,10 @@ public class Clinic {
 
 	public ArrayList<Patient> getListFifoRadiologie() {
 		return listFifoRadiologie;
+	}
+
+	public Comparator<Patient> getComparatorPatient() {
+		return comparatorPatient;
 	}
 
 }

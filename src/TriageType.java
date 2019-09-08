@@ -1,4 +1,4 @@
 
 public enum TriageType {
-	FIFO
+	FIFO, GRAVITY
 }
