@@ -1,42 +1,33 @@
 import java.util.ArrayList;
-import java.util.Comparator;
 
-public class Clinic {
+public class Clinic extends GestionPatient {
 
-	private ArrayList<Patient> listFifoMedecin;
-	private ArrayList<Patient> listFifoRadiologie;
-	private TriageType triageType;
-	private int priorityGravity = 5;
-	private Comparator<Patient> comparatorPatient = new Comparator<Patient>() {
-		@Override
-		public int compare(Patient p1, Patient p2) {
-			if (p1.getGravity() > priorityGravity || p2.getGravity() > priorityGravity) {
-				// on ne fait les priorité que pour une valeurs au dessus de 5
-				return p2.getGravity() - p1.getGravity();
-			}
-			return 0;
-		}
-	};
+	private ArrayList<Patient> listForMedecin;
+	private ArrayList<Patient> listForRadiologie;
 
 	public Clinic(TriageType triageType) {
 		this.triageType = triageType;
-		listFifoMedecin = new ArrayList<Patient>();
-		listFifoRadiologie = new ArrayList<Patient>();
+		listForMedecin = new ArrayList<Patient>();
+		listForRadiologie = new ArrayList<Patient>();
 	}
 
+	@Override
 	public void triagePatient(Patient patient) {
+		if (patient.getGravity() == 1) {
+			return;
+		}
 		if (triageType == TriageType.FIFO) {
-			listFifoMedecin.add(patient);
+			listForMedecin.add(patient);
 			if (NeedRadiologie(patient.getVisible_symptom())) {
-				listFifoRadiologie.add(patient);
+				listForRadiologie.add(patient);
 			}
 		}
 		if (triageType == TriageType.GRAVITY) {
-			listFifoMedecin.add(patient);
-			listFifoMedecin.sort(comparatorPatient);
+			listForMedecin.add(patient);
+			listForMedecin.sort(comparatorPatient);
 			if (NeedRadiologie(patient.getVisible_symptom())) {
-				listFifoRadiologie.add(patient);
-				listFifoRadiologie.sort(comparatorPatient);
+				listForRadiologie.add(patient);
+				listForRadiologie.sort(comparatorPatient);
 			}
 		}
 	}
@@ -48,20 +39,12 @@ public class Clinic {
 		return false;
 	}
 
-	public TriageType getTriageType() {
-		return triageType;
-	}
-
 	public ArrayList<Patient> getListFifoMedecin() {
-		return listFifoMedecin;
+		return listForMedecin;
 	}
 
 	public ArrayList<Patient> getListFifoRadiologie() {
-		return listFifoRadiologie;
-	}
-
-	public Comparator<Patient> getComparatorPatient() {
-		return comparatorPatient;
+		return listForRadiologie;
 	}
 
 }
